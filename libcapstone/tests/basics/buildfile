@@ -1,0 +1,3 @@
+import libs = libcapstone%lib{capstone}
+
+exe{driver}: {h c}{**} $libs testscript{**}
