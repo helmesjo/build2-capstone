@@ -28,13 +28,24 @@ lib{capstone}: file{**.inc}: include = adhoc
 # "include/capstone/....h", relative to the package root rather than to
 # themselves.
 #
+# $out_pfx_src/arch and $src_pfx_src/arch are needed because a number of
+# architecture backend headers (ARMMapping.h, X86DisassemblerDecoder.h,
+# etc.) include the public headers as "../../include/capstone/....h",
+# relative to their own arch/<name>/
+# directory as if it were two levels below the package root, which is only
+# true in the upstream tree (where arch/ and include/ are siblings). The
+# compiler falls back to its include search path for such a quoted,
+# relative-with-components include, so adding this directory lets the
+# same "../../include/..." spelling resolve to the real public header.
+#
 out_pfx_inc = [dir_path] $out_root/include/
 src_pfx_inc = [dir_path] $src_root/include/
 out_pfx_src = [dir_path] $out_root/src/
 src_pfx_src = [dir_path] $src_root/src/
 
-c.poptions =+ "-I$out_root" "-I$src_root"           \
-              "-I$out_pfx_src" "-I$src_pfx_src"     \
+c.poptions =+ "-I$out_root" "-I$src_root"                     \
+              "-I$out_pfx_src" "-I$src_pfx_src"               \
+              "-I$out_pfx_src/arch" "-I$src_pfx_src/arch"     \
               "-I$out_pfx_inc" "-I$src_pfx_inc"
 
 # Enable every architecture backend unconditionally: unlike, say, SIMD
