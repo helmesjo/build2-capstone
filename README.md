@@ -1,21 +1,21 @@
-# build2-capstone - <SUMMARY>
+# capstone - Multi-architecture disassembler C library
 
-This is a `build2` package repository for [`build2-capstone`](https://<UPSTREAM-URL>),
-a <SUMMARY-OF-FUNCTIONALITY>.
+This is a `build2` package repository for [`capstone`](https://github.com/capstone-engine/capstone),
+a lightweight, multi-architecture disassembly framework.
 
 This file contains setup instructions and other details that are more
 appropriate for development rather than consumption. If you want to use
-`build2-capstone` in your `build2`-based project, then instead see the accompanying
-[`PACKAGE-README.md`](<PACKAGE>/PACKAGE-README.md) file.
+`libcapstone` in your `build2`-based project, then instead see the accompanying
+[`PACKAGE-README.md`](libcapstone/PACKAGE-README.md) file.
 
-The development setup for `build2-capstone` uses the standard `bdep`-based workflow.
+The development setup for `capstone` uses the standard `bdep`-based workflow.
 For example:
 
 ```
-git clone .../build2-capstone.git
-cd build2-capstone
+git clone .../capstone.git
+cd capstone
 
-bdep init -C @gcc cc config.cxx=g++
+bdep init -C @gcc cc config.c=gcc
 bdep update
 bdep test
 ```
