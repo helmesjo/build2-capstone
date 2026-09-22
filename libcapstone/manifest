@@ -1,16 +1,16 @@
 : 1
 name: libcapstone
-version: 0.1.0-a.0.z
+version: 6.0.0-a.10.z
 language: c
-project: build2-capstone
-summary: capstone C library
+project: capstone
+summary: Multi-architecture disassembler C library
 license: BSD-3-Clause ; BSD 3-Clause "New" or "Revised" License.
 description-file: README.md
 package-description-file: PACKAGE-README.md
-changes-file: CHANGELOG
-url: https://example.org/upstream
-email: upstream@example.org
-package-url: https://github.com/build2-packaging/build2-capstone
+changes-file: ChangeLog
+url: https://www.capstone-engine.org
+email: aquynh@gmail.com
+package-url: https://github.com/build2-packaging/capstone
 package-email: packaging@build2.org ; Mailing list.
 depends: * build2 >= 0.18.0
 depends: * bpkg >= 0.18.0
