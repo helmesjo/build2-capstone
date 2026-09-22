@@ -4,7 +4,7 @@ version: 6.0.0-a.10.z
 language: c
 project: capstone
 summary: Multi-architecture disassembler C library
-license: BSD-3-Clause ; BSD 3-Clause "New" or "Revised" License.
+license: BSD-3-Clause, NCSA, Apache-2.0 WITH LLVM-exception ; BSD-3-Clause covers capstone's own code. NCSA (University of Illinois/NCSA Open Source License) covers over 40 LLVM-derived disassembler and instruction-printer sources bundled upstream (MCInst, MCRegisterInfo, arch/*/*Disassembler.c, etc.), shipped as LICENSE_LLVM.TXT. Apache-2.0 WITH LLVM-exception covers over 40 newer LLVM-derived architecture sources (arch/AArch64, arch/ARM, arch/Mips, etc.), as declared by their SPDX headers.
 description-file: README.md
 package-description-file: PACKAGE-README.md
 changes-file: ChangeLog
