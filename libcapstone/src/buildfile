@@ -16,18 +16,63 @@ lib{capstone}: $pub/{$pub_hdrs}
 #
 lib{capstone}: {h c}{**} $impl_libs $intf_libs
 
+# Table/data files (*.inc) #included by the architecture backends. They are
+# not compiled on their own, so they are tracked ad hoc for dist and clean.
+#
+lib{capstone}: file{**.inc}: include = adhoc
+
 # Build options.
+#
+# $out_root/$src_root are needed because a few private engine headers
+# (Mapping.h, MCInst.h, SStream.h, etc.) include the public headers as
+# "include/capstone/....h", relative to the package root rather than to
+# themselves.
 #
 out_pfx_inc = [dir_path] $out_root/include/
 src_pfx_inc = [dir_path] $src_root/include/
 out_pfx_src = [dir_path] $out_root/src/
 src_pfx_src = [dir_path] $src_root/src/
 
-c.poptions =+ "-I$out_pfx_src" "-I$src_pfx_src" \
+c.poptions =+ "-I$out_root" "-I$src_root"           \
+              "-I$out_pfx_src" "-I$src_pfx_src"     \
               "-I$out_pfx_inc" "-I$src_pfx_inc"
 
-#obja{*}: c.poptions += -DCAPSTONE_STATIC_BUILD
-#objs{*}: c.poptions += -DCAPSTONE_SHARED_BUILD
+# Enable every architecture backend unconditionally: unlike, say, SIMD
+# variants, a disassembler backend has no dependency on the build host's
+# own architecture, so there is no reason to gate any of them behind a
+# configuration variable. This also matches upstream's own CMake default
+# (CAPSTONE_ARCHITECTURE_DEFAULT=ON, i.e., every CAPSTONE_*_SUPPORT option
+# on) and how most distributions package the library.
+#
+c.poptions += -DCAPSTONE_HAS_AARCH64     \
+              -DCAPSTONE_HAS_ALPHA       \
+              -DCAPSTONE_HAS_ARC         \
+              -DCAPSTONE_HAS_ARM         \
+              -DCAPSTONE_HAS_BPF         \
+              -DCAPSTONE_HAS_EVM         \
+              -DCAPSTONE_HAS_HPPA        \
+              -DCAPSTONE_HAS_LOONGARCH   \
+              -DCAPSTONE_HAS_M68K        \
+              -DCAPSTONE_HAS_M680X       \
+              -DCAPSTONE_HAS_MIPS        \
+              -DCAPSTONE_HAS_MOS65XX     \
+              -DCAPSTONE_HAS_POWERPC     \
+              -DCAPSTONE_HAS_RISCV       \
+              -DCAPSTONE_HAS_SH          \
+              -DCAPSTONE_HAS_SPARC       \
+              -DCAPSTONE_HAS_SYSTEMZ     \
+              -DCAPSTONE_HAS_TMS320C64X  \
+              -DCAPSTONE_HAS_TRICORE     \
+              -DCAPSTONE_HAS_WASM        \
+              -DCAPSTONE_HAS_X86         \
+              -DCAPSTONE_HAS_XCORE       \
+              -DCAPSTONE_HAS_XTENSA      \
+              -DCAPSTONE_USE_SYS_DYN_MEM
+
+# Mark the public API __declspec(dllexport) when building the DLL with MSVC
+# (matches upstream's CMake, which defines this for shared builds only).
+#
+objs{*}: c.poptions += -DCAPSTONE_SHARED
 
 # Export options.
 #
@@ -36,9 +81,6 @@ lib{capstone}:
   c.export.poptions = "-I$out_pfx_inc" "-I$src_pfx_inc"
   c.export.libs = $intf_libs
 }
-
-#liba{capstone}: c.export.poptions += -DCAPSTONE_STATIC
-#libs{capstone}: c.export.poptions += -DCAPSTONE_SHARED
 
 # For pre-releases use the complete version to make sure they cannot
 # be used in place of another pre-release or the final version. See
@@ -51,4 +93,4 @@ else
 
 # Don't install private headers.
 #
-h{*}: install = false
+h{**}: install = false
