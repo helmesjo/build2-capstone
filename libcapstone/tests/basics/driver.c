@@ -1,73 +1,46 @@
-#include <stdio.h>
-#include <errno.h>
-#include <string.h>
-
 #include <capstone/capstone.h>
 
 #undef NDEBUG
 #include <assert.h>
 
-#ifdef _WIN32
-#define tmpfile mytmpfile
-static FILE *mytmpfile ();
-#endif
-
 int main ()
 {
-  char b[256];
+  csh h;
+  cs_insn *insn;
+  size_t n;
 
-  /* Basics.
+  /* `mov eax, 0x1; ret` in 32-bit x86 machine code.
    */
   {
-    FILE *o = tmpfile ();
-    assert (say_hello (o, "World") > 0);
-    rewind (o);
-    assert (fread (b, 1, sizeof (b), o) == 14 &&
-            strncmp (b, "Hello, World!\n", 14) == 0);
-    fclose (o);
+    const unsigned char code[] = {0xb8, 0x01, 0x00, 0x00, 0x00, 0xc3};
+
+    assert (cs_open (CS_ARCH_X86, CS_MODE_32, &h) == CS_ERR_OK);
+
+    n = cs_disasm (h, code, sizeof (code), 0x1000, 0, &insn);
+    assert (n == 2);
+
+    assert (insn[0].id == X86_INS_MOV);
+    assert (insn[1].id == X86_INS_RET);
+
+    cs_free (insn, n);
+    assert (cs_close (&h) == CS_ERR_OK);
   }
 
-  /* Empty name.
+  /* `ret` in little-endian AArch64 machine code.
    */
   {
-    FILE *o = tmpfile ();
-    assert (say_hello (o, "") < 0 && errno == EINVAL);
-    fclose (o);
+    const unsigned char code[] = {0xc0, 0x03, 0x5f, 0xd6};
+
+    assert (cs_open (CS_ARCH_AARCH64, CS_MODE_ARM, &h) == CS_ERR_OK);
+
+    n = cs_disasm (h, code, sizeof (code), 0x1000, 0, &insn);
+    assert (n == 1);
+
+    assert (insn[0].id == AARCH64_INS_RET);
+
+    cs_free (insn, n);
+    assert (cs_close (&h) == CS_ERR_OK);
   }
 
   return 0;
 }
-
-#ifdef _WIN32
-#include <windows.h>
-#include <fcntl.h>
-#include <io.h>
-
-FILE *mytmpfile ()
-{
-  char d[MAX_PATH + 1], p[MAX_PATH + 1];
-  if (GetTempPathA (sizeof (d), d) == 0 ||
-      GetTempFileNameA (d, "tmp", 0, p) == 0)
-    return NULL;
-
-  HANDLE h = CreateFileA (p,
-                          GENERIC_READ | GENERIC_WRITE,
-                          0,
-                          NULL,
-                          CREATE_ALWAYS,
-                          FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE,
-                          NULL);
-  if (h == INVALID_HANDLE_VALUE)
-    return NULL;
-
-  int fd = _open_osfhandle ((intptr_t) h, _O_RDWR);
-  if (fd == -1)
-    return NULL;
-
-  FILE *f = _fdopen (fd, "wb+");
-  if (f == NULL)
-    _close (fd);
-
-  return f;
-}
-#endif
