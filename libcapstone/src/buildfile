@@ -85,6 +85,16 @@ c.poptions += -DCAPSTONE_HAS_AARCH64     \
 #
 objs{*}: c.poptions += -DCAPSTONE_SHARED
 
+# A few ARM and AArch64 translation units define functions by pasting a
+# `true`/`false` argument into their names (via CONCAT()), relying on
+# <stdbool.h> defining these as 1 and 0 to match the generated callers
+# (printFoo_1, etc). In C23 `true`/`false` are keywords rather than macros,
+# which breaks this. For just these translation units, define them the way
+# <stdbool.h> did before C23.
+#
+arch/ARM/obj{ARMDisassembler ARMInstPrinter}: c.poptions += -Dtrue=1 -Dfalse=0
+arch/AArch64/obj{AArch64InstPrinter}:         c.poptions += -Dtrue=1 -Dfalse=0
+
 # Export options.
 #
 lib{capstone}:
